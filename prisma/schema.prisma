@@ -29,7 +29,7 @@ model Post {
   content       String
   user          User      @relation(fields: [user_id], references: [id], onDelete: Cascade) // On delete cascasde deltes  the post when user is deleted
   user_id       Int
-  comment_count BigInt    @default(0)
+  comment_count Int       @default(0)
   createdAt     DateTime  @default(now())
   comment       Comment[]
 }
