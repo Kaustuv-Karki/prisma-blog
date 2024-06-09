@@ -15,6 +15,14 @@ export const getAllPosts = async (req, res) => {
           },
         },
       },
+      orderBy: {
+        createdAt: "desc",
+      },
+      where: {
+        comment_count: {
+          gt: 0,
+        },
+      },
     });
     res.status(200).json({ posts, message: "Posts fetched successfully" });
   } catch (error) {
@@ -80,6 +88,22 @@ export const deletePost = async (req, res) => {
       },
     });
     res.status(200).json({ message: "Post deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+export const searchPosts = async (req, res) => {
+  const { query } = req.query;
+  try {
+    const posts = await prisma.post.findMany({
+      where: {
+        title: {
+          search: query,
+        },
+      },
+    });
+    res.status(200).json({ posts, message: "Posts fetched successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
