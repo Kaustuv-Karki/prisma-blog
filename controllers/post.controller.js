@@ -1,8 +1,21 @@
 import prisma from "../DB/db.config.js";
 
 export const getAllPosts = async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const perPage = parseInt(req.query.perPage) || 10;
+  if (page < 0) {
+    page = 1;
+  }
+
+  if (perPage < 0 || perPage > 100) {
+    perPage = 10;
+  }
+
+  const offset = (page - 1) * perPage;
   try {
     const posts = await prisma.post.findMany({
+      skip: offset,
+      take: perPage,
       include: {
         comment: {
           select: {
@@ -24,7 +37,14 @@ export const getAllPosts = async (req, res) => {
         },
       },
     });
-    res.status(200).json({ posts, message: "Posts fetched successfully" });
+
+    const totalPosts = await prisma.post.count();
+    const totalPages = Math.ceil(totalPosts / perPage);
+    res.status(200).json({
+      posts,
+      message: "Posts fetched successfully",
+      meta: { totalPages, currentPage: page, limit: perPage },
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
